@@ -1,0 +1,29 @@
+name: Continuous Deployment to AWS Free Tier
+
+on:
+  push:
+    branches: [ "master" ] # Matches your default branch name
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository Code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Connection
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-south-1
+
+    - name: Update Application Code over SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: 65.2.140.25 # Your exact AWS EC2 Public IP address
+        username: ubuntu
+        key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+        script: |
+          echo "<h1>Hello World! Automatically deployed via GitHub Actions CI/CD Pipeline.</h1>" | sudo tee /var/www/html/index.html
+
